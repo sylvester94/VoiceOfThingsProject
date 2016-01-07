@@ -95,17 +95,17 @@ void stop(int startSpeed, int endSpeed, int duration)
 
 void turnLeft(int startSpeed, int endSpeed, int duration)
 {
-  for(int speed = startSpeed;speed >= endSpeed;speed-=10)
+  for(int speed = startSpeed;speed < endSpeed;speed+=10)
   {
     motors.setLeftSpeed(-speed);
     motors.setRightSpeed(speed);
-    delay(duration/((startSpeed - endSpeed)/10));
+    delay(duration/((endSpeed - startSpeed)/10));
   }
 }
 
 void turnRight(int startSpeed, int endSpeed, int duration)
 {
-  for(int speed = startSpeed;speed <= endSpeed;speed+=10)
+  for(int speed = startSpeed;speed < endSpeed;speed+=10)
   {
     motors.setLeftSpeed(speed);
     motors.setRightSpeed(-speed);
@@ -120,9 +120,6 @@ void loop()
     order = Serial.read();
     Serial.println(order);
    
-    // if 'y' (decimal 121) is received, turn LED/Powertail on
-    // anything other than 121 is received, turn LED/Powertail off
-
     if (order == 66) // B
     {  
       forward(0,400,300);
@@ -130,18 +127,49 @@ void loop()
     }
     if(order == 67)   // C
     { 
-      backward(0,300,200);
-      stop(300,0,200);
+      backward(0,400,300);
+      stop(400,0,300);
     }
     if(order == 68)  // D
     {
-    turnRight(0,150,300);
-    stop(150,0,300);
+      turnRight(0,200,300);
+      stop(200,0,300);
     }
     if(order == 69)  // E 
     {  
-      turnLeft(0,150,300);
-      stop(150,0,300);
+      turnLeft(0,200,300);
+      stop(200,0,300);
+    }
+    if (order == 70)  // turn around - F
+    {
+      for(int speed = 0; speed <= 400 ; speed++)
+      {
+        motors.setLeftSpeed(speed);
+        motors.setRightSpeed(-speed);
+        delay(10);
+      } 
+      motors.setLeftSpeed(0);
+      motors.setRightSpeed(0);
+    } 
+    if(order == 71)  //tango -G
+    { for(int i=0;i<=5;i++)
+      {
+        forward(0,400,200);
+        stop(400,0,200);
+        forward(0,400,200);
+        stop(400,0,200);
+        backward(0,400,200);
+        stop(400,0,200);
+      }                     
+    }
+    if(order == 72)  // crazy H
+    {
+      for(int i=0;i<=10;i++)
+      {
+        turnLeft(50,250,200);
+        turnRight(50,250,200);
+      }
+      stop(250,0,200);
     }
     if(order == 65)  // Mario dance    // A
     {
@@ -156,16 +184,21 @@ void loop()
             stop(200,0,30);
           }
           currentIdx++;
-        }break;
+        }else if(currentIdx >= MELODY_LENGTH)
+        {
+          buzzer.stopPlaying();
+          currentIdx = 0;
+          break;
+        }
       }
       Serial.print("--Arduino received: ");
       Serial.println(order);
     }
-      else  
-      {
-        digitalWrite(LED_PIN, HIGH);
-        delay(1000);
-        digitalWrite(LED_PIN, LOW);
-      }
+    else  
+    {
+      digitalWrite(LED_PIN, HIGH);
+      delay(1000);
+      digitalWrite(LED_PIN, LOW);
+    }
   }
 }
